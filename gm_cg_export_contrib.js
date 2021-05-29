@@ -2,7 +2,7 @@
 // @name         CG Contrib. Export
 // @description  CodinGame Contributions Export Button
 // @namespace    https://github.com/blegloannec/cg-gm-scripts
-// @version      1
+// @version      1.1
 // @include      https://www.codingame.com/contribute/view/*
 // @run-at       document-idle
 // @grant        unsafeWindow
@@ -27,7 +27,9 @@ function add_export_button() {
     subtabs.appendChild(a_export);
 }
 
-function export_button_click() {
+
+/* === Handmade export format === */
+function _export_button_click() {
     var cancel_button = document.getElementsByClassName("cancel-button");
     if (cancel_button.length === 0) {
 	alert('Please click on the "EDIT" button first.');
@@ -40,7 +42,7 @@ function export_button_click() {
 	contrib.push(content);
 	contrib.push("\n=====  END  " + field + " =====\n\n\n");
     }
-
+    
     var gen_info = location.href + "\n" + document.title + "\n" + document.lastModified;
     contrib_push('Contribution', gen_info);
     
@@ -79,9 +81,29 @@ function export_button_click() {
     
     var blob = new Blob(contrib);
     var blob_url = window.URL.createObjectURL(blob);
-
+    
     var virtual_a = document.createElement("a");
     virtual_a.setAttribute("href", blob_url);
     virtual_a.setAttribute("download", "contribution.txt");
+    return virtual_a.click();
+}
+
+
+/* === JSON CG API export === */
+function export_button_click() {
+    var contrib = [];
+    var handle = window.location.href.split("/").pop();
+
+    // API call
+    var req = new XMLHttpRequest();
+    req.open("POST", "https://www.codingame.com/services/Contribution/findContribution", false);  // sync.
+    req.send(JSON.stringify([handle, true]));
+    
+    var blob = new Blob([req.responseText]);
+    var blob_url = window.URL.createObjectURL(blob);
+    
+    var virtual_a = document.createElement("a");
+    virtual_a.setAttribute("href", blob_url);
+    virtual_a.setAttribute("download", "contribution.json");
     return virtual_a.click();
 }
